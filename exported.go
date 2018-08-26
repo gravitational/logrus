@@ -41,6 +41,11 @@ func GetLevel() Level {
 	return std.level()
 }
 
+// IsLevelEnabled checks if the log level of the standard logger is greater than the level param
+func IsLevelEnabled(level Level) bool {
+	return std.IsLevelEnabled(level)
+}
+
 // AddHook adds a hook to the standard logger hooks.
 func AddHook(hook Hook) {
 	std.mu.Lock()

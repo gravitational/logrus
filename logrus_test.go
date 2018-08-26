@@ -406,3 +406,54 @@ func TestEntryRace(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+func TestLogLevelEnabled(t *testing.T) {
+	log := New()
+	log.SetLevel(PanicLevel)
+	assert.Equal(t, true, log.IsLevelEnabled(PanicLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(FatalLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(ErrorLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(WarnLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(InfoLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(DebugLevel))
+
+	log.SetLevel(FatalLevel)
+	assert.Equal(t, true, log.IsLevelEnabled(PanicLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(FatalLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(ErrorLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(WarnLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(InfoLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(DebugLevel))
+
+	log.SetLevel(ErrorLevel)
+	assert.Equal(t, true, log.IsLevelEnabled(PanicLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(FatalLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(ErrorLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(WarnLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(InfoLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(DebugLevel))
+
+	log.SetLevel(WarnLevel)
+	assert.Equal(t, true, log.IsLevelEnabled(PanicLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(FatalLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(ErrorLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(WarnLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(InfoLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(DebugLevel))
+
+	log.SetLevel(InfoLevel)
+	assert.Equal(t, true, log.IsLevelEnabled(PanicLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(FatalLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(ErrorLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(WarnLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(InfoLevel))
+	assert.Equal(t, false, log.IsLevelEnabled(DebugLevel))
+
+	log.SetLevel(DebugLevel)
+	assert.Equal(t, true, log.IsLevelEnabled(PanicLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(FatalLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(ErrorLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(WarnLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(InfoLevel))
+	assert.Equal(t, true, log.IsLevelEnabled(DebugLevel))
+}
