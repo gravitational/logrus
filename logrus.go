@@ -14,24 +14,11 @@ type Level uint32
 
 // Convert the Level to a string. E.g. PanicLevel becomes "panic".
 func (level Level) String() string {
-	switch level {
-	case TraceLevel:
-		return "trace"
-	case DebugLevel:
-		return "debug"
-	case InfoLevel:
-		return "info"
-	case WarnLevel:
-		return "warning"
-	case ErrorLevel:
-		return "error"
-	case FatalLevel:
-		return "fatal"
-	case PanicLevel:
-		return "panic"
+	if b, err := level.MarshalText(); err == nil {
+		return string(b)
+	} else {
+		return "unknown"
 	}
-
-	return "unknown"
 }
 
 // ParseLevel takes a string level and returns the Logrus log level constant.
@@ -57,6 +44,39 @@ func ParseLevel(lvl string) (Level, error) {
 	return l, fmt.Errorf("not a valid logrus Level: %q", lvl)
 }
 
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (level *Level) UnmarshalText(text []byte) error {
+	l, err := ParseLevel(string(text))
+	if err != nil {
+		return err
+	}
+
+	*level = l
+
+	return nil
+}
+
+func (level Level) MarshalText() ([]byte, error) {
+	switch level {
+	case TraceLevel:
+		return []byte("trace"), nil
+	case DebugLevel:
+		return []byte("debug"), nil
+	case InfoLevel:
+		return []byte("info"), nil
+	case WarnLevel:
+		return []byte("warning"), nil
+	case ErrorLevel:
+		return []byte("error"), nil
+	case FatalLevel:
+		return []byte("fatal"), nil
+	case PanicLevel:
+		return []byte("panic"), nil
+	}
+
+	return nil, fmt.Errorf("not a valid logrus level %d", level)
+}
+
 // A constant exposing all logging levels
 var AllLevels = []Level{
 	PanicLevel,
@@ -74,7 +94,7 @@ const (
 	// PanicLevel level, highest level of severity. Logs and then calls panic with the
 	// message passed to Debug, Info, ...
 	PanicLevel Level = iota
-	// FatalLevel level. Logs and then calls `os.Exit(1)`. It will exit even if the
+	// FatalLevel level. Logs and then calls `logger.Exit(1)`. It will exit even if the
 	// logging level is set to Panic.
 	FatalLevel
 	// ErrorLevel level. Logs. Used for errors that should definitely be noted.
@@ -87,7 +107,7 @@ const (
 	InfoLevel
 	// DebugLevel level. Usually only enabled when debugging. Very verbose logging.
 	DebugLevel
-	// TraceLevel level. Usually only enabled when debugging. Very verbose logging.  Usually reserved for message traces
+	// TraceLevel level. Designates finer-grained informational events than the Debug.
 	TraceLevel
 )
 
@@ -121,7 +141,6 @@ type FieldLogger interface {
 	WithFields(fields Fields) *Entry
 	WithError(err error) *Entry
 
-	Tracef(format string, args ...interface{})
 	Debugf(format string, args ...interface{})
 	Infof(format string, args ...interface{})
 	Printf(format string, args ...interface{})
@@ -131,7 +150,6 @@ type FieldLogger interface {
 	Fatalf(format string, args ...interface{})
 	Panicf(format string, args ...interface{})
 
-	Trace(args ...interface{})
 	Debug(args ...interface{})
 	Info(args ...interface{})
 	Print(args ...interface{})
@@ -141,7 +159,6 @@ type FieldLogger interface {
 	Fatal(args ...interface{})
 	Panic(args ...interface{})
 
-	Traceln(args ...interface{})
 	Debugln(args ...interface{})
 	Infoln(args ...interface{})
 	Println(args ...interface{})
@@ -157,4 +174,13 @@ type FieldLogger interface {
 	// IsErrorEnabled() bool
 	// IsFatalEnabled() bool
 	// IsPanicEnabled() bool
+}
+
+// Ext1FieldLogger (the first extension to FieldLogger) is superfluous, it is
+// here for consistancy. Do not use. Use Logger or Entry instead.
+type Ext1FieldLogger interface {
+	FieldLogger
+	Tracef(format string, args ...interface{})
+	Trace(args ...interface{})
+	Traceln(args ...interface{})
 }
